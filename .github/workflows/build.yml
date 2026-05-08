@@ -74,9 +74,15 @@ jobs:
         run: |
           xrobot_init_mod
 
+      - name: Checkout Referee module
+        uses: actions/checkout@v4
+        with:
+          repository: QDU-Robomaster/Referee
+          path: Modules/Referee
+
       - name: Add BlinkLED module
         run: |
-          xrobot_add_mod BlinkLED --instance-id BlinkLED_0
+          xrobot_add_mod BlinkLED --instance-id BlinkLED_0 && xrobot_add_mod Referee --instance-id ref && cat User/xrobot.yaml
 
       - name: Add this repo module
         run: |
