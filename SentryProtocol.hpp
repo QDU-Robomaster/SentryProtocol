@@ -5,7 +5,7 @@
 module_description: 哨兵裁判系统决策发送模块
 constructor_args:
   - referee: '@&ref'
-  - referee_sentry_tp_name: "sentry_ref"
+  - referee_sentry_tp_name: "robot_game_ref"
   - buy_bullet_topic_name: "sentry_buy_bullet_num"
   - remote_buy_bullet_times_topic_name: "sentry_remote_buy_bullet_times"
   - remote_buy_hp_times_topic_name: "sentry_remote_buy_hp_times"
