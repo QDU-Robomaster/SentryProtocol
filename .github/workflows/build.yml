@@ -80,9 +80,15 @@ jobs:
           repository: QDU-Robomaster/Referee
           path: Modules/Referee
 
+      - name: Checkout CMD module
+        uses: actions/checkout@v4
+        with:
+          repository: QDU-Robomaster/CMD
+          path: Modules/CMD
+
       - name: Add BlinkLED module
         run: |
-          xrobot_add_mod BlinkLED --instance-id BlinkLED_0 && xrobot_add_mod Referee --instance-id ref && cat User/xrobot.yaml
+          xrobot_add_mod BlinkLED --instance-id BlinkLED_0 && xrobot_add_mod Referee --instance-id ref && xrobot_add_mod CMD --instance-id cmd && cat User/xrobot.yaml
 
       - name: Add this repo module
         run: |
