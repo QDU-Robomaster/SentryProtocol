@@ -4,7 +4,7 @@
 /* === MODULE MANIFEST V2 ===
 module_description: 哨兵裁判系统决策发送模块
 constructor_args:
-  - referee: '@&ref'
+  - referee: '@nullptr'
   - referee_sentry_tp_name: "robot_game_ref"
   - buy_bullet_topic_name: "sentry_buy_bullet_num"
   - remote_buy_bullet_times_topic_name: "sentry_remote_buy_bullet_times"
@@ -19,6 +19,7 @@ depends:
 // clang-format on
 
 #include <cstdint>
+#include <optional>
 
 #include "Referee.hpp"
 #include "app_framework.hpp"
@@ -34,21 +35,21 @@ class SentryProtocol : public LibXR::Application {
                  const char* buy_bullet_topic_name,
                  const char* remote_buy_bullet_times_topic_name,
                  const char* remote_buy_hp_times_topic_name,
-                 const char* buy_resurrection_topic_name,
-                 const char* state_topic_name)
-      : referee_(referee),
-        referee_suber_(referee_sentry_tp_name),
-        buy_bullet_topic_(
-            LibXR::Topic::CreateTopic<uint16_t>(buy_bullet_topic_name)),
-        remote_buy_bullet_times_topic_(LibXR::Topic::CreateTopic<uint8_t>(
-            remote_buy_bullet_times_topic_name)),
-        remote_buy_hp_times_topic_(
-            LibXR::Topic::CreateTopic<uint8_t>(remote_buy_hp_times_topic_name)),
-        buy_resurrection_topic_(
-            LibXR::Topic::CreateTopic<bool>(buy_resurrection_topic_name)),
-        state_topic_(LibXR::Topic::CreateTopic<uint8_t>(state_topic_name)) {
+                 const char* buy_resurrection_topic_name, const char* state_topic_name)
+      : referee_(referee)
+  {
     UNUSED(hw);
 
+    ASSERT(referee_ != nullptr);
+    buy_bullet_topic_ = LibXR::Topic::CreateTopic<uint16_t>(buy_bullet_topic_name);
+    remote_buy_bullet_times_topic_ =
+        LibXR::Topic::CreateTopic<uint8_t>(remote_buy_bullet_times_topic_name);
+    remote_buy_hp_times_topic_ =
+        LibXR::Topic::CreateTopic<uint8_t>(remote_buy_hp_times_topic_name);
+    buy_resurrection_topic_ =
+        LibXR::Topic::CreateTopic<bool>(buy_resurrection_topic_name);
+    state_topic_ = LibXR::Topic::CreateTopic<uint8_t>(state_topic_name);
+    referee_suber_.emplace(referee_sentry_tp_name);
     RegisterTopic<&SentryProtocol::OnBuyBulletTopic>(buy_bullet_topic_);
     RegisterTopic<&SentryProtocol::OnRemoteBuyBulletTopic>(
         remote_buy_bullet_times_topic_);
@@ -58,27 +59,22 @@ class SentryProtocol : public LibXR::Application {
         buy_resurrection_topic_);
     RegisterTopic<&SentryProtocol::OnStateTopic>(state_topic_);
 
-    referee_suber_.StartWaiting();
+    referee_suber_->StartWaiting();
     app.Register(*this);
   }
 
   void SetSwitchMode(State state) {
-    if (referee_ == nullptr) {
-      return;
-    }
-
+    ASSERT(referee_ != nullptr);
     referee_->SetSwitchMode(state);
     referee_->SendSentryPack();
   }
 
   void OnMonitor() override {
-    if (referee_suber_.Available()) {
-      referee_pack_ = referee_suber_.GetData();
-      referee_suber_.StartWaiting();
-    }
-
-    if (referee_ == nullptr) {
-      return;
+    ASSERT(referee_ != nullptr);
+    ASSERT(referee_suber_.has_value());
+    if (referee_suber_->Available()) {
+      referee_pack_ = referee_suber_->GetData();
+      referee_suber_->StartWaiting();
     }
 
     const bool IS_DEAD = referee_pack_.robot_status.max_hp != 0 &&
@@ -112,47 +108,58 @@ class SentryProtocol : public LibXR::Application {
   }
 
   void OnBuyBulletTopic(LibXR::RawData& raw_data) {
+    ASSERT(referee_ != nullptr);
     uint16_t buy_bullet_num = 0;
-    if (ReadTopicData(raw_data, buy_bullet_num) && referee_ != nullptr) {
+    if (ReadTopicData(raw_data, buy_bullet_num))
+    {
       referee_->SetNeedBullet(static_cast<uint8_t>(buy_bullet_num));
       referee_->SendSentryPack();
     }
   }
 
   void OnRemoteBuyBulletTopic(LibXR::RawData& raw_data) {
+    ASSERT(referee_ != nullptr);
     uint8_t bullet_number = 0;
-    if (ReadTopicData(raw_data, bullet_number) && referee_ != nullptr) {
+    if (ReadTopicData(raw_data, bullet_number))
+    {
       referee_->SetBulletRemote(bullet_number);
       referee_->SendSentryPack();
     }
   }
 
   void OnRemoteBuyHpTopic(LibXR::RawData& raw_data) {
+    ASSERT(referee_ != nullptr);
     uint8_t buy_hp = 0;
-    if (ReadTopicData(raw_data, buy_hp) && buy_hp != 0 && referee_ != nullptr) {
+    if (ReadTopicData(raw_data, buy_hp) && buy_hp != 0)
+    {
       referee_->SetHPRemote();
       referee_->SendSentryPack();
     }
   }
 
   void OnBuyResurrectionTopic(LibXR::RawData& raw_data) {
+    ASSERT(referee_ != nullptr);
     bool buy_resurrection = false;
-    if (ReadTopicData(raw_data, buy_resurrection) && referee_ != nullptr) {
+    if (ReadTopicData(raw_data, buy_resurrection))
+    {
       referee_->SetRevivalRemote(buy_resurrection);
       referee_->SendSentryPack();
     }
   }
 
   void OnStateTopic(LibXR::RawData& raw_data) {
+    ASSERT(referee_ != nullptr);
     uint8_t state = 0;
-    if (ReadTopicData(raw_data, state) && referee_ != nullptr) {
+    if (ReadTopicData(raw_data, state))
+    {
       referee_->SetSwitchMode(static_cast<State>(state));
       referee_->SendSentryPack();
     }
   }
 
   Referee* referee_;
-  LibXR::Topic::ASyncSubscriber<Referee::RobotGameRefereePack> referee_suber_;
+  std::optional<LibXR::Topic::ASyncSubscriber<Referee::RobotGameRefereePack>>
+      referee_suber_;
   LibXR::Topic buy_bullet_topic_;
   LibXR::Topic remote_buy_bullet_times_topic_;
   LibXR::Topic remote_buy_hp_times_topic_;
