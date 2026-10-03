@@ -99,7 +99,7 @@ An instance written by `xrobot instance add QDU-Robomaster/SentryProtocol`, with
 ```yaml
 modules:
   - module: QDU-Robomaster/SentryProtocol
-    id: sentryprotocol_0
+    id: SentryProtocol_0
     args:
       - referee: '&ref'
       - referee_sentry_tp_name: "robot_game_ref"
