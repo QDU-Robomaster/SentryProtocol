@@ -15,11 +15,45 @@ depends:
 #include "libxr_def.hpp"
 #include "message.hpp"
 
+/**
+ * @brief 哨兵自主决策发送模块。
+ *        Sentry decision sender Module.
+ *
+ * @details 订阅决策请求 Topic，写入 Referee 的哨兵决策数据（0x0120）
+ *          并发送给裁判系统服务器。
+ *          Subscribes to the decision request Topics, writes them into the sentry
+ *          decision data (0x0120) of Referee and sends it to the referee system server.
+ */
 class SentryProtocol
 {
  public:
+  /**
+   * @brief 哨兵姿态。
+   *        Sentry posture.
+   */
   using State = Referee::State;
 
+  /**
+   * @brief 构造 SentryProtocol，订阅裁判摘要 Topic 并创建、注册 5 个决策请求 Topic。
+   *        Construct SentryProtocol, subscribe to the referee summary Topic and create
+   *        and register the 5 decision request Topics.
+   *
+   * @param referee Referee 实例；为 `nullptr` 时跳过所有发送。
+   *                Referee instance; all sending is skipped when `nullptr`.
+   * @param referee_sentry_tp_name 订阅的裁判摘要 Topic 名称。
+   *                               Name of the subscribed referee summary Topic.
+   * @param buy_bullet_topic_name 自主兑换发弹量 Topic 名称。
+   *                              Name of the autonomous projectile exchange Topic.
+   * @param remote_buy_bullet_times_topic_name 远程兑换发弹量 Topic 名称。
+   *                                           Name of the remote projectile exchange
+   *                                           Topic.
+   * @param remote_buy_hp_times_topic_name 远程兑换血量 Topic 名称。
+   *                                       Name of the remote HP exchange Topic.
+   * @param buy_resurrection_topic_name 兑换立即复活 Topic 名称。
+   *                                    Name of the immediate revival exchange Topic.
+   * @param state_topic_name 切换姿态 Topic 名称。
+   *                         Name of the posture switch Topic.
+   */
   SentryProtocol(
       Referee* referee,
       const char* referee_sentry_tp_name = "robot_game_ref",
@@ -50,6 +84,13 @@ class SentryProtocol
     referee_suber_.StartWaiting();
   }
 
+  /**
+   * @brief 设置哨兵姿态并发送哨兵包。
+   *        Set the sentry posture and send the sentry packet.
+   *
+   * @param state 目标姿态。
+   *              Target posture.
+   */
   void SetSwitchMode(State state)
   {
     if (referee_ == nullptr)
@@ -61,6 +102,13 @@ class SentryProtocol
     referee_->SendSentryPack();
   }
 
+  /**
+   * @brief 监视回调：更新裁判摘要，阵亡（`max_hp != 0` 且 `remain_hp == 0`）
+   *        时设置确认复活并发送哨兵包。
+   *        Monitor callback: update the referee summary and, when the robot is dead
+   *        (`max_hp != 0` and `remain_hp == 0`), set the revival confirmation and send
+   *        the sentry packet.
+   */
   void OnMonitor()
   {
     if (referee_suber_.Available())
