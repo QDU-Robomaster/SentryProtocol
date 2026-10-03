@@ -2,7 +2,7 @@
 
 // clang-format off
 /* === MODULE MANIFEST V2 ===
-module_description: 哨兵裁判系统决策发送模块
+module_description: 哨兵自主决策发送模块：把 Topic 上的决策请求写入 Referee 的哨兵决策数据并发送给裁判系统服务器 / Sentry decision sender Module that writes decision requests from Topics into the Referee sentry decision data and sends it to the referee system server
 depends:
 - id: QDU-Robomaster/Referee
   ref: same-or-dev
