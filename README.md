@@ -10,13 +10,13 @@ SentryProtocol 把上层经 Topic 发来的哨兵自主决策请求写入 `Refer
 
 | 默认 Topic | 类型 | 处理 |
 | --- | --- | --- |
-| `sentry_buy_bullet_num` | `uint16_t` | `SetNeedBullet()`：把数值（转换为 `uint8_t`）累加到兑换发弹量 |
+| `sentry_buy_bullet_num` | `uint16_t` | `SetNeedBullet()`：把数值累加到兑换发弹量 |
 | `sentry_remote_buy_bullet_times` | `uint8_t` | `SetBulletRemote()`：远程兑换发弹量请求次数加 1，并累加兑换发弹量 |
 | `sentry_remote_buy_hp_times` | `uint8_t` | 非 0 时调用 `SetHPRemote()`：远程兑换血量请求次数加 1 |
 | `sentry_buy_resurrection` | `bool` | `SetRevivalRemote()`：设置是否兑换立即复活 |
 | `sentry_state` | `uint8_t` | `SetSwitchMode()`：切换姿态（1 进攻、2 防御、3 移动） |
 
-`OnMonitor()` 由生成的主函数在监视循环中调用：取最新的裁判摘要，当 `max_hp != 0` 且 `remain_hp == 0`（已阵亡）时调用 `SetConfirmRevival(true)` 并发送哨兵包，因此阵亡期间每个监视周期发送一次确认复活。`SetSwitchMode(State)` 供其他代码直接切换姿态并发送哨兵包。`referee` 为 `nullptr` 时发送操作被跳过。
+`OnMonitor()` 由生成的主函数在监视循环中调用：取最新的裁判摘要，在机器人阵亡（`max_hp != 0` 且 `remain_hp == 0`）时调用 `SetConfirmRevival(true)` 并发送哨兵包，确认复活。`SetSwitchMode(State)` 供其他代码直接切换姿态并发送哨兵包。`referee` 为 `nullptr` 时发送操作被跳过。
 
 SentryProtocol writes the sentry autonomous decision requests that arrive over Topics into the sentry decision data (0x0120) of `Referee` and immediately calls `Referee::SendSentryPack()` to send it to the referee system server.
 
@@ -24,13 +24,13 @@ At construction, SentryProtocol subscribes to `referee_sentry_tp_name` (`Referee
 
 | Default Topic | Type | Handling |
 | --- | --- | --- |
-| `sentry_buy_bullet_num` | `uint16_t` | `SetNeedBullet()`: adds the value (converted to `uint8_t`) to the projectile amount to exchange |
+| `sentry_buy_bullet_num` | `uint16_t` | `SetNeedBullet()`: adds the value to the projectile amount to exchange |
 | `sentry_remote_buy_bullet_times` | `uint8_t` | `SetBulletRemote()`: increments the remote projectile exchange request count by 1 and adds to the amount to exchange |
 | `sentry_remote_buy_hp_times` | `uint8_t` | When non-zero calls `SetHPRemote()`: increments the remote HP exchange request count by 1 |
 | `sentry_buy_resurrection` | `bool` | `SetRevivalRemote()`: sets whether to exchange for an immediate revival |
 | `sentry_state` | `uint8_t` | `SetSwitchMode()`: switches the posture (1 attack, 2 defend, 3 move) |
 
-`OnMonitor()` is called by the generated main function in its monitor loop: it takes the latest referee summary and, when `max_hp != 0` and `remain_hp == 0` (the robot is dead), calls `SetConfirmRevival(true)` and sends the sentry packet, so a revival confirmation is sent once per monitor cycle while the robot is dead. `SetSwitchMode(State)` lets other code switch the posture and send the sentry packet directly. With `referee` set to `nullptr` the send operations are skipped.
+`OnMonitor()` is called by the generated main function in its monitor loop: it takes the latest referee summary and, when the robot is dead (`max_hp != 0` and `remain_hp == 0`), calls `SetConfirmRevival(true)` and sends the sentry packet to confirm the revival. `SetSwitchMode(State)` lets other code switch the posture and send the sentry packet directly. With `referee` set to `nullptr` the send operations are skipped.
 
 ## 2. 构造接口 / Constructor
 
