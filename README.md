@@ -75,26 +75,26 @@ Configuration parameters:
 | Topic（默认名称） | 方向 | 类型 | 说明 |
 | --- | --- | --- | --- |
 | `referee_sentry_tp_name`（`robot_game_ref`） | 订阅 | `Referee::RobotGameRefereePack` | 裁判摘要，`OnMonitor()` 用于判断是否阵亡 |
-| `buy_bullet_topic_name`（`sentry_buy_bullet_num`） | 输入 | `uint16_t` | 自主兑换发弹量 |
-| `remote_buy_bullet_times_topic_name`（`sentry_remote_buy_bullet_times`） | 输入 | `uint8_t` | 远程兑换发弹量 |
-| `remote_buy_hp_times_topic_name`（`sentry_remote_buy_hp_times`） | 输入 | `uint8_t` | 远程兑换血量 |
-| `buy_resurrection_topic_name`（`sentry_buy_resurrection`） | 输入 | `bool` | 兑换立即复活 |
-| `state_topic_name`（`sentry_state`） | 输入 | `uint8_t` | 切换姿态 |
+| `buy_bullet_topic_name`（`sentry_buy_bullet_num`） | 创建并订阅 | `uint16_t` | 自主兑换发弹量 |
+| `remote_buy_bullet_times_topic_name`（`sentry_remote_buy_bullet_times`） | 创建并订阅 | `uint8_t` | 远程兑换发弹量 |
+| `remote_buy_hp_times_topic_name`（`sentry_remote_buy_hp_times`） | 创建并订阅 | `uint8_t` | 远程兑换血量 |
+| `buy_resurrection_topic_name`（`sentry_buy_resurrection`） | 创建并订阅 | `bool` | 兑换立即复活 |
+| `state_topic_name`（`sentry_state`） | 创建并订阅 | `uint8_t` | 切换姿态 |
 
 | Topic (default name) | Direction | Type | Meaning |
 | --- | --- | --- | --- |
 | `referee_sentry_tp_name` (`robot_game_ref`) | Subscribe | `Referee::RobotGameRefereePack` | Referee summary, used by `OnMonitor()` to detect death |
-| `buy_bullet_topic_name` (`sentry_buy_bullet_num`) | Input | `uint16_t` | Autonomous projectile exchange |
-| `remote_buy_bullet_times_topic_name` (`sentry_remote_buy_bullet_times`) | Input | `uint8_t` | Remote projectile exchange |
-| `remote_buy_hp_times_topic_name` (`sentry_remote_buy_hp_times`) | Input | `uint8_t` | Remote HP exchange |
-| `buy_resurrection_topic_name` (`sentry_buy_resurrection`) | Input | `bool` | Immediate revival exchange |
-| `state_topic_name` (`sentry_state`) | Input | `uint8_t` | Posture switch |
+| `buy_bullet_topic_name` (`sentry_buy_bullet_num`) | Create and subscribe | `uint16_t` | Autonomous projectile exchange |
+| `remote_buy_bullet_times_topic_name` (`sentry_remote_buy_bullet_times`) | Create and subscribe | `uint8_t` | Remote projectile exchange |
+| `remote_buy_hp_times_topic_name` (`sentry_remote_buy_hp_times`) | Create and subscribe | `uint8_t` | Remote HP exchange |
+| `buy_resurrection_topic_name` (`sentry_buy_resurrection`) | Create and subscribe | `bool` | Immediate revival exchange |
+| `state_topic_name` (`sentry_state`) | Create and subscribe | `uint8_t` | Posture switch |
 
 ## 4. 配置示例 / Configuration Example
 
-`xrobot instance add QDU-Robomaster/SentryProtocol` 写入的实例，`referee` 填写为 `QDU-Robomaster/Referee` 实例的 id（以 `&` 取地址）：
+`xrobot instance add QDU-Robomaster/SentryProtocol` 写入的实例，`referee` 填写为 `QDU-Robomaster/Referee` 实例，指针依赖写成 `'&id'`：
 
-An instance written by `xrobot instance add QDU-Robomaster/SentryProtocol`, with `referee` set to the id of a `QDU-Robomaster/Referee` instance (address taken with `&`):
+An instance written by `xrobot instance add QDU-Robomaster/SentryProtocol`, with `referee` set to a `QDU-Robomaster/Referee` instance, pointer dependencies written as `'&id'`:
 
 ```yaml
 modules:
